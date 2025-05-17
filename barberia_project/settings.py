@@ -136,7 +136,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'barberia_db',
         'USER': 'root', # O el usuario que hayas configurado
-        'PASSWORD': 'D1alZuM0', # La contraseña correspondiente
+        'PASSWORD': '', # La contraseña correspondiente
         'HOST': 'localhost', # O la dirección de tu servidor de BD
         'PORT': '3306', # Puerto de MySQL
         'OPTIONS': {
