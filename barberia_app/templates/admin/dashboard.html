@@ -1,0 +1,324 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}
+<style>
+    .dashboard-card {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+        padding: 20px;
+    }
+    
+    .dashboard-card h2 {
+        border-bottom: 1px solid #eee;
+        font-size: 18px;
+        margin-top: 0;
+        padding-bottom: 10px;
+    }
+    
+    .dashboard-stats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .stat-box {
+        background-color: #f8f9fa;
+        border-left: 4px solid #007bff;
+        border-radius: 4px;
+        flex: 1;
+        min-width: 200px;
+        padding: 15px;
+        text-align: center;
+    }
+    
+    .stat-box h3 {
+        font-size: 14px;
+        margin: 0 0 10px 0;
+    }
+    
+    .stat-value {
+        font-size: 24px;
+        font-weight: bold;
+    }
+    
+    .citas-hoy {
+        border-left-color: #28a745;
+    }
+    
+    .ventas-hoy {
+        border-left-color: #dc3545;
+    }
+    
+    .productos-bajo-stock {
+        border-left-color: #ffc107;
+    }
+    
+    .empleados-activos {
+        border-left-color: #17a2b8;
+    }
+    
+    .table-responsive {
+        overflow-x: auto;
+    }
+    
+    .dashboard-table {
+        width: 100%;
+    }
+    
+    .dashboard-table th {
+        background-color: #f8f9fa;
+        font-weight: bold;
+        text-align: left;
+    }
+    
+    .dashboard-table th, .dashboard-table td {
+        padding: 8px 12px;
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .dashboard-table tr:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .dashboard-row {
+        display: flex;
+        flex-wrap: wrap;
+        margin-left: -10px;
+        margin-right: -10px;
+    }
+    
+    .dashboard-col {
+        flex: 1;
+        min-width: 300px;
+        padding: 0 10px;
+    }
+    
+    .badge {
+        border-radius: 4px;
+        display: inline-block;
+        font-size: 12px;
+        font-weight: bold;
+        padding: 3px 7px;
+    }
+    
+    .badge-success {
+        background-color: #d4edda;
+        color: #155724;
+    }
+    
+    .badge-warning {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+    
+    .badge-danger {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+    
+    .badge-info {
+        background-color: #d1ecf1;
+        color: #0c5460;
+    }
+    
+    .badge-primary {
+        background-color: #cce5ff;
+        color: #004085;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- En las tarjetas con estadísticas -->
+<div class="stat-box citas-hoy">
+    <h3>Citas para hoy</h3>
+    <div class="stat-value">{{ citas_hoy.count }}</div>
+    <a href="{% url 'admin:barberia_app_cita_changelist' %}" class="btn btn-sm btn-outline-primary mt-2">Ver todas</a>
+</div>
+<div class="dashboard-stats">
+    <div class="stat-box citas-hoy">
+        <h3>Citas para hoy</h3>
+        <div class="stat-value">{{ citas_hoy.count }}</div>
+    </div>
+    
+    <div class="stat-box ventas-hoy">
+        <h3>Ventas de hoy</h3>
+        <div class="stat-value">S/. {{ total_ventas_hoy|floatformat:2 }}</div>
+    </div>
+    
+    <div class="stat-box productos-bajo-stock">
+        <h3>Productos bajo stock</h3>
+        <div class="stat-value">{{ productos_bajo_stock.count }}</div>
+    </div>
+    
+    <div class="stat-box empleados-activos">
+        <h3>Empleados disponibles</h3>
+        <div class="stat-value">{{ empleados_disponibles.count }}</div>
+    </div>
+</div>
+
+<div class="dashboard-row">
+    <div class="dashboard-col">
+        <div class="dashboard-card">
+            <h2>Citas del día</h2>
+            <div class="table-responsive">
+                <table class="dashboard-table">
+                    <thead>
+                        <tr>
+                            <th>Hora</th>
+                            <th>Cliente</th>
+                            <th>Barbero</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cita in citas_hoy %}
+                        <tr>
+                            <td>{{ cita.fecha_hora|date:"H:i" }}</td>
+                            <td>{{ cita.cliente.nombre }} {{ cita.cliente.apellido }}</td>
+                            <td>{{ cita.empleado.nombre }} {{ cita.empleado.apellido }}</td>
+                            <td>
+                                {% if cita.estado == 'pendiente' %}
+                                <span class="badge badge-warning">Pendiente</span>
+                                {% elif cita.estado == 'confirmada' %}
+                                <span class="badge badge-primary">Confirmada</span>
+                                {% elif cita.estado == 'completada' %}
+                                <span class="badge badge-success">Completada</span>
+                                {% elif cita.estado == 'cancelada' %}
+                                <span class="badge badge-danger">Cancelada</span>
+                                {% elif cita.estado == 'no_asistio' %}
+                                <span class="badge badge-danger">No Asistió</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" style="text-align: center;">No hay citas programadas para hoy</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="dashboard-card">
+            <h2>Productos con bajo stock</h2>
+            <div class="table-responsive">
+                <table class="dashboard-table">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Categoría</th>
+                            <th>Stock actual</th>
+                            <th>Stock mínimo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for producto in productos_bajo_stock %}
+                        <tr>
+                            <td>{{ producto.nombre }}</td>
+                            <td>{{ producto.categoria }}</td>
+                            <td>{{ producto.stock_actual }}</td>
+                            <td>{{ producto.stock_minimo }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" style="text-align: center;">No hay productos con bajo stock</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <div class="dashboard-col">
+        <div class="dashboard-card">
+            <h2>Servicios más solicitados</h2>
+            <div class="table-responsive">
+                <table class="dashboard-table">
+                    <thead>
+                        <tr>
+                            <th>Servicio</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for servicio in servicios_populares %}
+                        <tr>
+                            <td>{{ servicio.servicio__nombre }}</td>
+                            <td>{{ servicio.total }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="2" style="text-align: center;">No hay datos disponibles</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="dashboard-card">
+            <h2>Productos más vendidos</h2>
+            <div class="table-responsive">
+                <table class="dashboard-table">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for producto in productos_populares %}
+                        <tr>
+                            <td>{{ producto.producto__nombre }}</td>
+                            <td>{{ producto.total }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="2" style="text-align: center;">No hay datos disponibles</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="dashboard-card">
+            <h2>Actividad reciente</h2>
+            <div class="table-responsive">
+                <table class="dashboard-table">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Tabla</th>
+                            <th>Operación</th>
+                            <th>Usuario</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in actividad_reciente %}
+                        <tr>
+                            <td>{{ log.fecha_hora|date:"d/m/Y H:i" }}</td>
+                            <td>{{ log.tabla_afectada }}</td>
+                            <td>{{ log.get_operacion_display }}</td>
+                            <td>{{ log.usuario_app|default:log.usuario_db }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" style="text-align: center;">No hay actividad reciente</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
